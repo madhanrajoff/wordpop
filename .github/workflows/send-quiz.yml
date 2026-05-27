@@ -1,0 +1,27 @@
+name: Send quiz pushes
+
+# Primary scheduler for WordPop. GitHub Actions cron grants 5-minute
+# granularity for free, which beats Vercel Hobby's once-per-day cap.
+# Adjust the cron expression below if you want a different cadence.
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # every 30 minutes
+  workflow_dispatch:           # manual run from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Trigger /api/send-quiz
+        run: |
+          set -euo pipefail
+          RESPONSE=$(curl -sS -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.APP_URL }}/api/send-quiz")
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          STATUS=$(echo "$RESPONSE" | tail -n 1)
+          echo "HTTP $STATUS"
+          echo "$BODY"
+          test "$STATUS" = "200"
