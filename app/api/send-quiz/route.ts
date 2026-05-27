@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { webpush } from '@/lib/web-push';
+import { getWebPush } from '@/lib/web-push';
 import type { PushSubscriptionRow } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -64,8 +64,8 @@ export async function GET(req: NextRequest) {
       });
 
       try {
-        await webpush.sendNotification(
-          sub.subscription as Parameters<typeof webpush.sendNotification>[0],
+        await getWebPush().sendNotification(
+          sub.subscription as Parameters<ReturnType<typeof getWebPush>['sendNotification']>[0],
           payload
         );
         await supabase
