@@ -10,7 +10,7 @@ const MINUTE_MS = 60_000;
 
 const isUnauthorized = (req: NextRequest) => {
   const secret = process.env.CRON_SECRET;
-  if (!secret) return false; // local dev — no check
+  if (!secret) return false;
   return req.headers.get('authorization') !== `Bearer ${secret}`;
 };
 
@@ -34,10 +34,11 @@ export async function GET(req: NextRequest) {
   const sinceDate = new Date(now.getTime() - SEVEN_DAYS_MS).toISOString();
   let sent = 0;
   let skipped = 0;
+  let failed = 0;
+  const errors: string[] = [];
 
   await Promise.allSettled(
     (subs as PushSubscriptionRow[]).map(async (sub) => {
-      // Honor per-user interval since last notification
       const lastAt = sub.last_notified_at ? new Date(sub.last_notified_at) : new Date(0);
       if ((now.getTime() - lastAt.getTime()) / MINUTE_MS < sub.interval_minutes) {
         skipped++;
@@ -74,13 +75,15 @@ export async function GET(req: NextRequest) {
           .eq('id', sub.id);
         sent++;
       } catch (err) {
-        // 410 Gone → subscription expired; clean it up
-        if ((err as { statusCode?: number })?.statusCode === 410) {
+        const e = err as { statusCode?: number; message?: string; body?: string };
+        failed++;
+        errors.push(`status=${e.statusCode} ${e.body ?? e.message ?? String(err)}`);
+        if (e.statusCode === 410) {
           await supabase.from('push_subscriptions').delete().eq('id', sub.id);
         }
       }
     })
   );
 
-  return NextResponse.json({ ok: true, sent, skipped, total: subs.length });
+  return NextResponse.json({ ok: true, sent, skipped, failed, total: subs.length, errors });
 }
