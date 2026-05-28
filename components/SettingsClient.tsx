@@ -46,12 +46,17 @@ function IntervalSetting({ initial }: { initial: number }) {
 
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('push_subscriptions')
       .update({ interval_minutes: mins })
-      .eq('user_id', user!.id);
+      .eq('user_id', user!.id)
+      .select('id');
     setSaving(false);
-    flash(error ? 'Failed to save.' : 'Interval saved!', !error);
+
+    if (error) return flash('Failed to save.', false);
+    if (!data || data.length === 0)
+      return flash('Enable notifications first, then set frequency.', false);
+    flash('Interval saved!', true);
   };
 
   return (
