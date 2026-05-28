@@ -160,16 +160,18 @@ function NotificationToggle({ initial }: { initial: boolean }) {
         <button
           onClick={handleToggle}
           disabled={busy}
-          aria-pressed={enabled}
+          role="switch"
+          aria-checked={enabled}
           aria-label={enabled ? 'Disable notifications' : 'Enable notifications'}
-          className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors disabled:opacity-50 overflow-hidden ${
-            enabled ? 'bg-accent' : 'bg-white/20'
-          }`}
+          className={`inline-flex flex-shrink-0 h-6 w-11 items-center rounded-full border-2 border-transparent
+                      transition-colors duration-200 disabled:opacity-50 cursor-pointer
+                      ${enabled ? 'bg-accent' : 'bg-white/20'}`}
         >
           <span
-            className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-              enabled ? 'translate-x-5' : 'translate-x-0'
-            }`}
+            aria-hidden="true"
+            className={`inline-block h-5 w-5 rounded-full bg-white shadow
+                        transition-transform duration-200 ease-in-out
+                        ${enabled ? 'translate-x-5' : 'translate-x-0'}`}
           />
         </button>
       </div>
