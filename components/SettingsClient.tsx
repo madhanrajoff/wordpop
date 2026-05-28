@@ -162,13 +162,13 @@ function NotificationToggle({ initial }: { initial: boolean }) {
           disabled={busy}
           aria-pressed={enabled}
           aria-label={enabled ? 'Disable notifications' : 'Enable notifications'}
-          className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${
+          className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors disabled:opacity-50 overflow-hidden ${
             enabled ? 'bg-accent' : 'bg-white/20'
           }`}
         >
           <span
-            className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-              enabled ? 'translate-x-7' : 'translate-x-1'
+            className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
+              enabled ? 'translate-x-5' : 'translate-x-0'
             }`}
           />
         </button>
